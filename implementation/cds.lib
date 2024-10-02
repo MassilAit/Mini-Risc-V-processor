@@ -1,0 +1,14 @@
+#-----------------------------------------------------------------------------
+# Project  ELE8304 : Circuits intégrés à très grande échelle
+#-----------------------------------------------------------------------------
+# File     cds.lib
+# Authors  Mickael Fiorentino <mickael.fiorentino@polymtl.ca>
+# Lab      GRM - Polytechnique Montréal
+# Date     <2019-09-10 Tue>
+#-----------------------------------------------------------------------------
+# Brief    Configuration des librairies pour les outils Cadence
+#-----------------------------------------------------------------------------
+DEFINE gpdk045 ${KIT_GPDK}/gpdk045
+DEFINE gsclib045_tech ${KIT_SCLIB}/gsclib045_tech/oa22/gsclib045_tech
+DEFINE gsclib045 ${KIT_SCLIB}/gsclib045/oa22/gsclib045
+DEFINE giolib045 ${KIT_IOLIB}/giolib045/oa22/giolib045
