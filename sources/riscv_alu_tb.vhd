@@ -57,10 +57,196 @@ begin
     i_src1   <= (others => '0');  -- Initialize source operand 1
     i_src2   <= (others => '0');  -- Initialize source operand 2
 
-    -- Wait and add more test cases
     wait for 20 ns;
     
-    -- Continue with other test scenarios and assertions...
+    --Test 1 : ALUOP_ADD (addition)
+    i_src1<=std_logic_vector(to_unsigned(20, XLEN));
+    i_src2<=std_logic_vector(to_unsigned(10, XLEN));
+    i_arith  <= '0';  -- Set for addition
+    i_sign   <= '0';  -- Set for unsigned operation
+    i_opcode<=ALUOP_ADD;
+    if o_res = std_logic_vector(to_unsigned(30, XLEN)) then
+     assert false report "Test 1 Passed: Addition (20 + 10) = 30" severity note;
+    else
+     assert false report "Test 1 Failed: Addition (20 + 10) should be 30" severity error;
+    end if;
+
+    wait for 20 ns;
+
+    --Test 2 : ALUOP_ADD (soustraction)
+    i_src1<=std_logic_vector(to_unsigned(20, XLEN));
+    i_src2<=std_logic_vector(to_unsigned(10, XLEN));
+    i_arith  <= '1';  -- Soustraction
+    i_sign   <= '0';  -- Set for unsigned operation
+    i_opcode<=ALUOP_ADD;
+    if o_res = std_logic_vector(to_unsigned(10, XLEN)) then
+     assert false report "Test 2 Passed: Substraction (20-10) = 10" severity note;
+    else
+     assert false report "Test 2 Failed: Addition (20 - 10) should be 10" severity error;
+    end if;
+
+    wait for 20 ns;
+
+    --Test 3 : ALUOP_SLT (résultat nul)
+    i_src1<=std_logic_vector(to_unsigned(10, XLEN));
+    i_src2<=std_logic_vector(to_unsigned(10, XLEN));
+    i_arith  <= '1';  -- Set for substraction
+    i_sign   <= '0';  -- Set for unsigned operation
+    i_opcode<=ALUOP_SLT;
+    if o_res = std_logic_vector(to_unsigned(1, XLEN)) then
+     assert false report "Test 3 Passed: Null result outputs 1" severity note;
+    else
+     assert false report "Test 3 Failed: Null result outputs 0" severity error;
+    end if;
+
+    wait for 20 ns;
+
+    --Test 4 : ALUOP_SLT (résultat non nul)
+    i_src1<=std_logic_vector(to_unsigned(20, XLEN));
+    i_src2<=std_logic_vector(to_unsigned(10, XLEN));
+    i_arith  <= '1';  -- Set for substraction
+    i_sign   <= '0';  -- Set for unsigned operation
+    i_opcode<=ALUOP_SLT;
+    if o_res = std_logic_vector(to_unsigned(0, XLEN)) then
+     assert false report "Test 4 Passed: Non null result outputs 0" severity note;
+    else
+     assert false report "Test 4 Failed: Non null result outputs 1" severity error;
+    end if;
+
+    wait for 20 ns;
+
+    --Test 5 : ALUOP_SL 
+    i_src1<=std_logic_vector(to_unsigned(1, XLEN));
+    i_shamt  <= "00001"; -- Shift amount (used for shift operations)
+    i_arith  <= '0';  -- Set for substraction
+    i_sign   <= '0';  -- Set for unsigned operation
+    i_opcode<=ALUOP_SL;
+    if o_res = std_logic_vector(to_unsigned(2, XLEN)) then
+     assert false report "Test 5 Passed: Shift left of 1 = 2" severity note;
+    else
+     assert false report "Test 5 Failed: Shift left of 1 != 2" severity error;
+    end if;
+
+    wait for 20 ns;
+
+     --Test 6 : ALUOP_SR (logique) 
+     i_src1<=std_logic_vector(to_unsigned(2, XLEN));
+     i_shamt  <= "00001"; -- Shift amount (used for shift operations)
+     i_arith  <= '0';  -- Set for substraction
+     i_sign   <= '0';  
+     i_opcode<=ALUOP_SR;
+     if o_res = std_logic_vector(to_unsigned(1, XLEN)) then
+      assert false report "Test 6 Passed: Logical shift right of 2 = 1" severity note;
+     else
+      assert false report "Test 6 Failed: Logical shift left of 2 != 1" severity error;
+     end if;
+ 
+     wait for 20 ns;
+
+     --Test 7 : ALUOP_SR (arithmétique) 
+     i_src1<=std_logic_vector(to_signed(-2, XLEN));
+     i_shamt  <= "00001"; -- Shift amount (used for shift operations)
+     i_arith  <= '1';  -- arithmetic shift
+     i_sign   <= '0';  
+     i_opcode<=ALUOP_SR;
+     if o_res = std_logic_vector(to_signed(-1, XLEN)) then
+      assert false report "Test 7 Passed: Arithmetic shift right of -2 = -1" severity note;
+     else
+      assert false report "Test 7 Failed: Arithmetic shift left of -2 != -1" severity error;
+     end if;
+
+    wait for 20 ns;
+
+    --Test 8 : XOR (1 xor 0)
+    i_src1<=std_logic_vector(to_unsigned(1, XLEN));
+    i_src2<=std_logic_vector(to_unsigned(0, XLEN));
+    i_arith  <= '0';  
+    i_sign   <= '0';
+    i_shamt  <= "00000";   
+    i_opcode<=ALUOP_XOR;
+    if o_res = std_logic_vector(to_unsigned(1, XLEN)) then
+     assert false report "Test 8 Passed: 1 Xor 0 = 1" severity note;
+    else
+     assert false report "Test 8 Failed: 1 Xor 0 != 1" severity error;
+    end if;
+
+    wait for 20 ns;
+
+    --Test 9 : XOR (1 xor 1)
+    i_src1<=std_logic_vector(to_unsigned(1, XLEN));
+    i_src2<=std_logic_vector(to_unsigned(1, XLEN));
+    i_arith  <= '0';  
+    i_sign   <= '0';
+    i_shamt  <= "00000";   
+    i_opcode<=ALUOP_XOR;
+    if o_res = std_logic_vector(to_unsigned(0, XLEN)) then
+     assert false report "Test 9 Passed: 1 Xor 1 = 0" severity note;
+    else
+     assert false report "Test 9 Failed: 1 Xor 1 != 0" severity error;
+    end if;
+
+    wait for 20 ns;
+
+
+    --Test 10 : OR (1 or 1)
+    i_src1<=std_logic_vector(to_unsigned(1, XLEN));
+    i_src2<=std_logic_vector(to_unsigned(1, XLEN));
+    i_arith  <= '0';  
+    i_sign   <= '0';
+    i_shamt  <= "00000";   
+    i_opcode<=ALUOP_OR;
+    if o_res = std_logic_vector(to_unsigned(1, XLEN)) then
+     assert false report "Test 10 Passed: 1 or 1 = 1" severity note;
+    else
+     assert false report "Test 10 Failed: 1 or 1 != 1" severity error;
+    end if;
+
+    wait for 20 ns;
+
+     --Test 11 : OR (1 or 0)
+     i_src1<=std_logic_vector(to_unsigned(1, XLEN));
+     i_src2<=std_logic_vector(to_unsigned(0, XLEN));
+     i_arith  <= '0';  
+     i_sign   <= '0';
+     i_shamt  <= "00000";   
+     i_opcode<=ALUOP_OR;
+     if o_res = std_logic_vector(to_unsigned(1, XLEN)) then
+      assert false report "Test 11 Passed: 1 or 0 = 1" severity note;
+     else
+      assert false report "Test 11 Failed: 1 or 0 != 1" severity error;
+     end if;
+ 
+     wait for 20 ns;
+
+     --Test 12 : And (1 or 0)
+     i_src1<=std_logic_vector(to_unsigned(1, XLEN));
+     i_src2<=std_logic_vector(to_unsigned(0, XLEN));
+     i_arith  <= '0';  
+     i_sign   <= '0';
+     i_shamt  <= "00000";   
+     i_opcode<=ALUOP_AND;
+     if o_res = std_logic_vector(to_unsigned(0, XLEN)) then
+      assert false report "Test 12 Passed: 1 and 0 = 0" severity note;
+     else
+      assert false report "Test 12 Failed: 1 and 0 != 0" severity error;
+     end if;
+ 
+     wait for 20 ns;
+
+     --Test 13 : And (1 or 0)
+     i_src1<=std_logic_vector(to_unsigned(1, XLEN));
+     i_src2<=std_logic_vector(to_unsigned(1, XLEN));
+     i_arith  <= '0';  
+     i_sign   <= '0';
+     i_shamt  <= "00000";   
+     i_opcode<=ALUOP_AND;
+     if o_res = std_logic_vector(to_unsigned(1, XLEN)) then
+      assert false report "Test 13 Passed: 1 and 1 = 1" severity note;
+     else
+      assert false report "Test 13 Failed: 1 and 1 != 1" severity error;
+     end if;
+ 
+     wait for 20 ns;
 
     wait;
   end process;
