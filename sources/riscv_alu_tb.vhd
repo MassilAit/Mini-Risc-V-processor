@@ -52,7 +52,7 @@ begin
     -- Example of initializing inputs (add your test cases)
     i_arith  <= '0';  -- Set for addition
     i_sign   <= '0';  -- Set for unsigned operation
-    i_opcode <= "0000";  -- Set an example opcode (replace with specific ALU operation)
+    i_opcode <= "000";  -- Set an example opcode (replace with specific ALU operation)
     i_shamt  <= "00000"; -- Shift amount (used for shift operations)
     i_src1   <= (others => '0');  -- Initialize source operand 1
     i_src2   <= (others => '0');  -- Initialize source operand 2
@@ -65,6 +65,7 @@ begin
     i_arith  <= '0';  -- Set for addition
     i_sign   <= '0';  -- Set for unsigned operation
     i_opcode<=ALUOP_ADD;
+    wait for 5 ns;
     if o_res = std_logic_vector(to_unsigned(30, XLEN)) then
      assert false report "Test 1 Passed: Addition (20 + 10) = 30" severity note;
     else
@@ -79,6 +80,7 @@ begin
     i_arith  <= '1';  -- Soustraction
     i_sign   <= '0';  -- Set for unsigned operation
     i_opcode<=ALUOP_ADD;
+    wait for 5 ns;
     if o_res = std_logic_vector(to_unsigned(10, XLEN)) then
      assert false report "Test 2 Passed: Substraction (20-10) = 10" severity note;
     else
@@ -93,6 +95,7 @@ begin
     i_arith  <= '1';  -- Set for substraction
     i_sign   <= '0';  -- Set for unsigned operation
     i_opcode<=ALUOP_SLT;
+    wait for 5 ns;
     if o_res = std_logic_vector(to_unsigned(1, XLEN)) then
      assert false report "Test 3 Passed: Null result outputs 1" severity note;
     else
@@ -107,6 +110,7 @@ begin
     i_arith  <= '1';  -- Set for substraction
     i_sign   <= '0';  -- Set for unsigned operation
     i_opcode<=ALUOP_SLT;
+    wait for 5 ns;
     if o_res = std_logic_vector(to_unsigned(0, XLEN)) then
      assert false report "Test 4 Passed: Non null result outputs 0" severity note;
     else
@@ -121,6 +125,7 @@ begin
     i_arith  <= '0';  -- Set for substraction
     i_sign   <= '0';  -- Set for unsigned operation
     i_opcode<=ALUOP_SL;
+    wait for 5 ns;
     if o_res = std_logic_vector(to_unsigned(2, XLEN)) then
      assert false report "Test 5 Passed: Shift left of 1 = 2" severity note;
     else
@@ -135,6 +140,7 @@ begin
      i_arith  <= '0';  -- Set for substraction
      i_sign   <= '0';  
      i_opcode<=ALUOP_SR;
+     wait for 5 ns;
      if o_res = std_logic_vector(to_unsigned(1, XLEN)) then
       assert false report "Test 6 Passed: Logical shift right of 2 = 1" severity note;
      else
@@ -149,6 +155,7 @@ begin
      i_arith  <= '1';  -- arithmetic shift
      i_sign   <= '0';  
      i_opcode<=ALUOP_SR;
+     wait for 5 ns;
      if o_res = std_logic_vector(to_signed(-1, XLEN)) then
       assert false report "Test 7 Passed: Arithmetic shift right of -2 = -1" severity note;
      else
@@ -164,6 +171,7 @@ begin
     i_sign   <= '0';
     i_shamt  <= "00000";   
     i_opcode<=ALUOP_XOR;
+    wait for 5 ns;
     if o_res = std_logic_vector(to_unsigned(1, XLEN)) then
      assert false report "Test 8 Passed: 1 Xor 0 = 1" severity note;
     else
@@ -179,6 +187,7 @@ begin
     i_sign   <= '0';
     i_shamt  <= "00000";   
     i_opcode<=ALUOP_XOR;
+    wait for 5 ns;
     if o_res = std_logic_vector(to_unsigned(0, XLEN)) then
      assert false report "Test 9 Passed: 1 Xor 1 = 0" severity note;
     else
@@ -195,6 +204,7 @@ begin
     i_sign   <= '0';
     i_shamt  <= "00000";   
     i_opcode<=ALUOP_OR;
+    wait for 5 ns;
     if o_res = std_logic_vector(to_unsigned(1, XLEN)) then
      assert false report "Test 10 Passed: 1 or 1 = 1" severity note;
     else
@@ -210,6 +220,7 @@ begin
      i_sign   <= '0';
      i_shamt  <= "00000";   
      i_opcode<=ALUOP_OR;
+     wait for 5 ns;
      if o_res = std_logic_vector(to_unsigned(1, XLEN)) then
       assert false report "Test 11 Passed: 1 or 0 = 1" severity note;
      else
@@ -225,6 +236,7 @@ begin
      i_sign   <= '0';
      i_shamt  <= "00000";   
      i_opcode<=ALUOP_AND;
+     wait for 5 ns;
      if o_res = std_logic_vector(to_unsigned(0, XLEN)) then
       assert false report "Test 12 Passed: 1 and 0 = 0" severity note;
      else
@@ -240,6 +252,7 @@ begin
      i_sign   <= '0';
      i_shamt  <= "00000";   
      i_opcode<=ALUOP_AND;
+     wait for 5 ns;
      if o_res = std_logic_vector(to_unsigned(1, XLEN)) then
       assert false report "Test 13 Passed: 1 and 1 = 1" severity note;
      else
