@@ -1,3 +1,7 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
 library work;
 use work.riscv_pkg.all;
 
@@ -21,4 +25,5 @@ entity riscv_core is
 end entity riscv_core;
 
 architecture beh of riscv_core is
+begin
 end architecture beh;
