@@ -21,6 +21,7 @@ architecture tb of tb_riscv_instruction_fetch is
             i_target    : in  std_logic_vector(XLEN-1 downto 0);
             i_imem_read : in  std_logic_vector(XLEN-1 downto 0);
             o_imem_addr : out std_logic_vector(XLEN-1 downto 0);
+            o_pc_current: out std_logic_vector(XLEN-1 downto 0);
             o_instr     : out std_logic_vector(XLEN-1 downto 0)
         );
     end component;
@@ -34,6 +35,7 @@ architecture tb of tb_riscv_instruction_fetch is
     signal target    : std_logic_vector(XLEN-1 downto 0) := (others => '0');
     signal imem_read : std_logic_vector(XLEN-1 downto 0) := (others => '0');
     signal imem_addr : std_logic_vector(XLEN-1 downto 0);
+    signal pc_current: std_logic_vector(XLEN-1 downto 0);
     signal instr     : std_logic_vector(XLEN-1 downto 0);
 
     -- Clock generation constant
@@ -51,6 +53,7 @@ begin
             i_target    => target,
             i_imem_read => imem_read,
             o_imem_addr => imem_addr,
+            o_pc_current=>pc_current,
             o_instr     => instr
         );
 
@@ -135,6 +138,14 @@ begin
             assert false report "Test Case 5 Passed: PC updated to jump target." severity note;
         else
             assert false report "Test Case 5 Failed: PC did not update correctly for jump." severity error;
+        end if;
+
+        -- Test Case 6: PC current Behavior
+
+        if pc_current = std_logic_vector(to_unsigned(16#00000010#, XLEN)) then
+            assert false report "Test Case 6 Passed: PC current do follows the PC value." severity note;
+        else
+            assert false report "Test Case 5 Failed: PC current do not follows the PC value." severity error;
         end if;
 
         wait;

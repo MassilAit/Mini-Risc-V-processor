@@ -22,6 +22,7 @@ entity riscv_instruction_fetch is
       o_imem_addr : out std_logic_vector(XLEN-1 downto 0);
 
       --To decode
+      o_pc_current   : out std_logic_vector(XLEN-1 downto 0);
       o_instr        : out std_logic_vector(XLEN-1 downto 0));
 end entity riscv_instruction_fetch;
 
@@ -65,6 +66,7 @@ begin
         begin
           if i_rstn = '0' then
             next_instruction <= x"00000013";
+            o_pc_current <= pc_out;
 
           elsif rising_edge(i_clk) then
             if i_flush = '1' then
@@ -79,6 +81,9 @@ begin
               -- Normal operation: Update IF/ID register with fetched instruction
               next_instruction <= i_imem_read;
             end if;
+
+            o_pc_current <= pc_out;
+
           end if;
     end process;
 
