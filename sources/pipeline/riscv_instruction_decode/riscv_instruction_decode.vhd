@@ -41,7 +41,7 @@ entity riscv_instruction_decode is
       
       -- Flags
       o_jmp       : out std_logic;   --jmp instr
-      o_jal       : out std_logic;   --is jal instr
+      o_jalr      : out std_logic;   --is jalr instr
       o_brnch     : out std_logic;   --branch instr
       o_src_imm   : out std_logic;   --immediate value
       o_rshmt     : out std_logic;   --use rs2 for shamt
@@ -68,7 +68,7 @@ architecture beh of riscv_instruction_decode is
     signal shamt     : std_logic_vector(SHAMT_WIDTH-1 downto 0);
     signal imm       : std_logic_vector(XLEN-1 downto 0);
     signal jmp       : std_logic;
-    signal jal       : std_logic;
+    signal jalr       : std_logic;
     signal brnch     : std_logic;
     signal src_imm   : std_logic;
     signal rshmt     : std_logic;
@@ -90,7 +90,7 @@ begin
             o_shamt => shamt,
             o_imm => imm,
             o_jmp => jmp,
-            o_jal => jal,
+            o_jalr => jalr,
             o_brnch => brnch,
             o_src_imm => src_imm,
             o_rshmt => rshmt,
@@ -124,7 +124,7 @@ begin
             o_shamt <= (others => '0');
             o_imm <= (others => '0');
             o_jmp <= '0';
-            o_jal <= '0';
+            o_jalr <= '0';
             o_brnch <= '0';
             o_src_imm <= '0';
             o_rshmt <= '0'; 
@@ -143,7 +143,7 @@ begin
                 o_shamt <= (others => '0');
                 o_imm <= (others => '0');
                 o_jmp <= '0';
-                o_jal <= '0';
+                o_jalr <= '0';
                 o_brnch <= '0';
                 o_src_imm <= '0';
                 o_rshmt <= '0'; 
@@ -160,7 +160,7 @@ begin
                 o_shamt <= shamt;
                 o_imm <= imm;
                 o_jmp <= jmp;
-                o_jal <= jal;
+                o_jalr <= jalr;
                 o_brnch <= brnch;
                 o_src_imm <= src_imm;
                 o_rshmt <= rshmt; 

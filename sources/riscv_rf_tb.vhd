@@ -162,6 +162,19 @@ begin
         assert false report "Test 5 Failed: Not all registers reset to 0." severity error;
     end if;
 
+    -- Test 6: Read both the same register 
+
+    i_addr_ra <= std_logic_vector(to_unsigned(0, REG_WIDTH));
+    i_addr_rb <= std_logic_vector(to_unsigned(0, REG_WIDTH));
+    wait for CLK_PERIOD*2;
+    
+    if o_data_ra = std_logic_vector(to_unsigned(0, XLEN)) and  o_data_rb = std_logic_vector(to_unsigned(0, XLEN)) then
+        assert false report "Test 6 Passed: both values are at the correct value." severity note;
+    
+    else
+        assert false report "Test 7 Failed: Not all values are at correct value." severity error;
+    end if;
+
     wait;
   end process;
 

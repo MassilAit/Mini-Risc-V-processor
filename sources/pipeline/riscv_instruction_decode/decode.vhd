@@ -25,7 +25,7 @@ entity decode is
       
       -- Flags
       o_jmp       : out std_logic;   --jmp instr
-      o_jal       : out std_logic;   --is jal instr
+      o_jalr       : out std_logic;   --is jalr instr
       o_brnch     : out std_logic;   --branch instr
       o_src_imm   : out std_logic;   --immediate value
       o_rshmt     : out std_logic;   --use rs2 for shamt
@@ -62,7 +62,7 @@ begin
         o_shamt <= (others => '0');
         o_imm <= (others => '0');
         o_jmp <= '0';
-        o_jal <= '0';
+        o_jalr <= '0';
         o_brnch <= '0';
         o_src_imm <= '0';
         o_rshmt <= '0'; 
@@ -230,7 +230,6 @@ begin
 
                 -- Flags
                 o_jmp <= '1';
-                o_jal <= '1';
                 o_brnch <= '0';
                 o_src_imm <= '1'; 
                 o_wb <= '1';      --We write the result back
@@ -256,7 +255,8 @@ begin
                     -- Flags
                     o_jmp <= '1';
                     o_wb <= '1';      --We write the result back
-                    o_src_imm <= '1'; -- Using the immediate value 
+                    o_src_imm <= '1'; -- Using the immediate value
+                    o_jalr <= '1'; 
 
                 
 

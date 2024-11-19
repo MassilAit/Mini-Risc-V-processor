@@ -37,7 +37,7 @@ architecture tb of tb_riscv_instruction_decode is
     signal o_shamt      : std_logic_vector(SHAMT_WIDTH-1 downto 0);
     signal o_imm        : std_logic_vector(XLEN-1 downto 0);
     signal o_jmp        : std_logic;
-    signal o_jal        : std_logic;
+    signal o_jalr       : std_logic;
     signal o_brnch      : std_logic;
     signal o_src_imm    : std_logic;
     signal o_rshmt      : std_logic;
@@ -71,7 +71,7 @@ begin
             o_shamt       => o_shamt,
             o_imm         => o_imm,
             o_jmp         => o_jmp,
-            o_jal         => o_jal,
+            o_jalr        => o_jalr,
             o_brnch       => o_brnch,
             o_src_imm     => o_src_imm,
             o_rshmt       => o_rshmt,
@@ -144,8 +144,8 @@ begin
         assert o_jmp = '0'
             report "jump flag incorrect" severity error;
                 
-        assert o_jal = '0'
-            report "jal flag incorrect" severity error;
+        assert o_jalr = '0'
+            report "jalr flag incorrect" severity error;
                 
         assert o_brnch = '0'
             report "branch flag incorrect" severity error;
