@@ -86,7 +86,7 @@ begin
      -- Read from register 1 to confirm the write
      i_we <= '0';
      i_addr_ra <= std_logic_vector(to_unsigned(1, REG_WIDTH));
-     wait for CLK_PERIOD*2;
+     wait for CLK_PERIOD;
  
      if o_data_ra = std_logic_vector(to_unsigned(1, XLEN)) then
        assert false report "Test 1 Passed: Register 1 correctly written with value 1." severity note;
