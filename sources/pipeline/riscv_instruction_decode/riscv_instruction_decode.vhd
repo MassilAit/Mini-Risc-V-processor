@@ -18,6 +18,7 @@ entity riscv_instruction_decode is
     
       -- From EX
       i_flush   : in  std_logic;
+      i_stall   : in  std_logic;
 
     
       -- From IF
@@ -28,6 +29,8 @@ entity riscv_instruction_decode is
       -- Registers
       o_rs1_data  : out std_logic_vector(XLEN-1 downto 0); --register 1 data
       o_rs2_data  : out std_logic_vector(XLEN-1 downto 0); --register 2 data
+      o_rs1_addr   : out std_logic_vector(REG_WIDTH-1 downto 0); -- register 1  adress
+      o_rs2_addr   : out std_logic_vector(REG_WIDTH-1 downto 0); -- register 2  adress
       o_rd_addr   : out std_logic_vector(REG_WIDTH-1 downto 0); -- Destination register adress
 
       -- ALU 
@@ -59,6 +62,8 @@ end entity riscv_instruction_decode;
 architecture beh of riscv_instruction_decode is
     
     -- Intermediate signals : 
+    signal i_rs1_addr  : std_logic_vector(REG_WIDTH-1 downto 0);
+    signal i_rs2_addr  : std_logic_vector(REG_WIDTH-1 downto 0);
     signal rs1_addr  : std_logic_vector(REG_WIDTH-1 downto 0);
     signal rs2_addr  : std_logic_vector(REG_WIDTH-1 downto 0);
     signal rd_addr   : std_logic_vector(REG_WIDTH-1 downto 0);
@@ -75,14 +80,33 @@ architecture beh of riscv_instruction_decode is
     signal wb        : std_logic;
     signal we        : std_logic;
     signal re        : std_logic;
+
+    -- Register output signals :
+    signal r_rs1_addr  : std_logic_vector(REG_WIDTH-1 downto 0);
+    signal r_rs2_addr  : std_logic_vector(REG_WIDTH-1 downto 0);
+    signal r_rd_addr   : std_logic_vector(REG_WIDTH-1 downto 0);
+    signal r_arith     : std_logic;
+    signal r_sign      : std_logic;
+    signal r_opcode    : std_logic_vector(ALUOP_WIDTH-1 downto 0);
+    signal r_shamt     : std_logic_vector(SHAMT_WIDTH-1 downto 0);
+    signal r_imm       : std_logic_vector(XLEN-1 downto 0);
+    signal r_jmp       : std_logic;
+    signal r_jalr       : std_logic;
+    signal r_brnch     : std_logic;
+    signal r_src_imm   : std_logic;
+    signal r_rshmt     : std_logic;
+    signal r_wb        : std_logic;
+    signal r_we        : std_logic;
+    signal r_re        : std_logic;
+    signal r_pc_current: std_logic_vector(XLEN-1 downto 0);
     
 begin
     -- Decode Module 
     decode: entity work.decode
         port map (
             i_instr => i_instr,
-            o_rs1_addr => rs1_addr,
-            o_rs2_addr => rs2_addr,
+            o_rs1_addr => i_rs1_addr,
+            o_rs2_addr => i_rs2_addr,
             o_rd_addr => rd_addr,
             o_arith => arith,
             o_sign => sign,
@@ -113,66 +137,129 @@ begin
       i_data_w  => i_rd_data
     );
 
+
+
+    -- In staling, we use the previous register adresses
+    process(i_stall, i_rs1_addr,i_rs2_addr,r_rs1_addr,r_rs2_addr)
+    begin
+        case i_stall is
+            when '0' =>
+                rs1_addr <= i_rs1_addr;
+                rs2_addr <= i_rs2_addr; 
+     
+            when others =>
+                rs1_addr <= r_rs1_addr;
+                rs2_addr <= r_rs2_addr;
+        
+        end case;
+
+        
+    end process;
+     
     process(i_clk, i_rstn)
     begin
         if i_rstn = '0' then
             
-            o_rd_addr <= (others => '0'); 
-            o_arith <= '0';
-            o_sign <= '0';
-            o_opcode  <= ALUOP_ADD;
-            o_shamt <= (others => '0');
-            o_imm <= (others => '0');
-            o_jmp <= '0';
-            o_jalr <= '0';
-            o_brnch <= '0';
-            o_src_imm <= '0';
-            o_rshmt <= '0'; 
-            o_wb <= '0';      
-            o_we <= '0';
-            o_re <= '0';
-            o_pc_current <= (others => '0');
+            r_rd_addr    <= (others => '0'); 
+            r_arith      <= '0';
+            r_sign       <= '0';
+            r_opcode     <= ALUOP_ADD;
+            r_shamt      <= (others => '0');
+            r_imm        <= (others => '0');
+            r_jmp        <= '0';
+            r_jalr       <= '0';
+            r_brnch      <= '0';
+            r_src_imm    <= '0';
+            r_rshmt      <= '0'; 
+            r_wb         <= '0';      
+            r_we         <= '0';
+            r_re         <= '0';
+            r_pc_current <= (others => '0');
+            r_rs1_addr   <= (others => '0');
+            r_rs2_addr   <= (others => '0');
 
             
         elsif rising_edge(i_clk) then
             if i_flush = '1' then
-                o_rd_addr <= (others => '0'); 
-                o_arith <= '0';
-                o_sign <= '0';
-                o_opcode  <= ALUOP_ADD;
-                o_shamt <= (others => '0');
-                o_imm <= (others => '0');
-                o_jmp <= '0';
-                o_jalr <= '0';
-                o_brnch <= '0';
-                o_src_imm <= '0';
-                o_rshmt <= '0'; 
-                o_wb <= '0';      
-                o_we <= '0';
-                o_re <= '0';
-                o_pc_current <= (others => '0');
+                r_rd_addr <= (others => '0'); 
+                r_arith <= '0';
+                r_sign <= '0';
+                r_opcode  <= ALUOP_ADD;
+                r_shamt <= (others => '0');
+                r_imm <= (others => '0');
+                r_jmp <= '0';
+                r_jalr <= '0';
+                r_brnch <= '0';
+                r_src_imm <= '0';
+                r_rshmt <= '0'; 
+                r_wb <= '0';      
+                r_we <= '0';
+                r_re <= '0';
+                r_pc_current <= (others => '0');
+                r_rs1_addr   <= (others => '0');
+                r_rs2_addr   <= (others => '0');
+
+            elsif i_stall ='1' then
+                r_rd_addr    <= r_rd_addr;
+                r_arith      <= r_arith;
+                r_sign       <= r_sign;
+                r_opcode     <= r_opcode;
+                r_shamt      <= r_shamt;
+                r_imm        <= r_imm;
+                r_jmp        <= r_jmp;
+                r_jalr       <= r_jalr;
+                r_brnch      <= r_brnch;
+                r_src_imm    <= r_src_imm;
+                r_rshmt      <= r_rshmt;
+                r_wb         <= r_wb;
+                r_we         <= r_we;
+                r_re         <= r_re;
+                r_pc_current <= r_pc_current;
+                r_rs1_addr   <= r_rs1_addr;
+                r_rs2_addr   <= r_rs2_addr; 
+                
 
             else
-                o_rd_addr <= rd_addr; 
-                o_arith <= arith;
-                o_sign <= sign;
-                o_opcode  <= opcode;
-                o_shamt <= shamt;
-                o_imm <= imm;
-                o_jmp <= jmp;
-                o_jalr <= jalr;
-                o_brnch <= brnch;
-                o_src_imm <= src_imm;
-                o_rshmt <= rshmt; 
-                o_wb <= wb;      
-                o_we <= we;
-                o_re <= re;
-                o_pc_current <= i_pc_current;
+                r_rd_addr <= rd_addr; 
+                r_arith <= arith;
+                r_sign <= sign;
+                r_opcode  <= opcode;
+                r_shamt <= shamt;
+                r_imm <= imm;
+                r_jmp <= jmp;
+                r_jalr <= jalr;
+                r_brnch <= brnch;
+                r_src_imm <= src_imm;
+                r_rshmt <= rshmt; 
+                r_wb <= wb;      
+                r_we <= we;
+                r_re <= re;
+                r_pc_current <= i_pc_current;
+                r_rs1_addr   <= rs1_addr;
+                r_rs2_addr   <= rs2_addr;
                 
             end if;
             
         end if;
     end process;
+
+    o_rd_addr    <= r_rd_addr;
+    o_arith      <= r_arith;
+    o_sign       <= r_sign;
+    o_opcode     <= r_opcode;
+    o_shamt      <= r_shamt;
+    o_imm        <= r_imm;
+    o_jmp        <= r_jmp;
+    o_jalr       <= r_jalr;
+    o_brnch      <= r_brnch;
+    o_src_imm    <= r_src_imm;
+    o_rshmt      <= r_rshmt;
+    o_wb         <= r_wb;
+    o_we         <= r_we;
+    o_re         <= r_re;
+    o_pc_current <= r_pc_current;
+    o_rs1_addr   <= r_rs1_addr;
+    o_rs2_addr   <= r_rs2_addr; 
 
     
     

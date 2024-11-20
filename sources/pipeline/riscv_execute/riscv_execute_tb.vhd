@@ -27,6 +27,8 @@ architecture tb of tb_riscv_execute is
     -- ID -> EX (signals)
     signal rs1_data   : std_logic_vector(XLEN-1 downto 0);
     signal rs2_data   : std_logic_vector(XLEN-1 downto 0);
+    signal rs1_addr   : std_logic_vector(REG_WIDTH-1 downto 0);
+    signal rs2_addr   : std_logic_vector(REG_WIDTH-1 downto 0);
     signal rd_addr    : std_logic_vector(REG_WIDTH-1 downto 0);
     signal arith      : std_logic;
     signal sign       : std_logic;
@@ -42,6 +44,17 @@ architecture tb of tb_riscv_execute is
     signal we         : std_logic;
     signal re         : std_logic;
     signal pc_current : std_logic_vector(XLEN-1 downto 0);
+
+    -- Forwarding
+    
+    signal i_mem_rd_addr : std_logic_vector(REG_WIDTH-1 downto 0) := (others => '0'); 
+    signal i_mem_rd_data : std_logic_vector(XLEN-1 downto 0) := (others => '0'); 
+    signal i_mem_rd_wb   : std_logic := '0';
+    signal i_mem_rd_re   : std_logic := '0';
+    
+    signal i_wb_rd_addr :  std_logic_vector(REG_WIDTH-1 downto 0) := (others => '0');  
+    signal i_wb_rd_data :  std_logic_vector(XLEN-1 downto 0) := (others => '0'); 
+    signal i_wb_rd_wb   :  std_logic := '0';
 
     --EX outputs
 
@@ -73,10 +86,13 @@ begin
             i_rd_addr     => i_rd_addr_wb,
             i_rd_data     => i_rd_data_wb,
             i_flush       => o_flush,
+            i_stall       => o_stall,
             i_pc_current  => i_pc_current,
             i_instr       => i_instr,
             o_rs1_data    => rs1_data,
             o_rs2_data    => rs2_data,
+            o_rs1_addr    => rs1_addr,
+            o_rs2_addr    => rs2_addr,
             o_rd_addr     => rd_addr,
             o_arith       => arith,
             o_sign        => sign,
@@ -98,8 +114,17 @@ begin
         port map (
             i_clk         => i_clk,
             i_rstn        => i_rstn,
+            i_mem_rd_addr => i_mem_rd_addr,
+            i_mem_rd_data => i_mem_rd_data,
+            i_mem_rd_wb   => i_mem_rd_wb,
+            i_mem_rd_re   => i_mem_rd_re,
+            i_wb_rd_addr  => i_wb_rd_addr,
+            i_wb_rd_data  => i_wb_rd_data,
+            i_wb_rd_wb    => i_wb_rd_wb,
             i_rs1_data    => rs1_data,
             i_rs2_data    => rs2_data,
+            i_rs1_addr    => rs1_addr,
+            i_rs2_addr    => rs2_addr,
             i_rd_addr     => rd_addr,
             i_arith       => arith,
             i_sign        => sign,

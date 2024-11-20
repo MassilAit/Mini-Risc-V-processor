@@ -11,6 +11,12 @@ entity riscv_memory_acces is
       i_clk       : in  std_logic;
       i_rstn      : in  std_logic;
 
+     -- Forwarding (to EX)
+      o_mem_rd_addr : out std_logic_vector(REG_WIDTH-1 downto 0); -- Destination register adress from memory stage
+      o_mem_rd_data : out std_logic_vector(XLEN-1 downto 0); --Destination register data from memory
+      o_mem_rd_wb   : out std_logic; -- Will the data be written
+      o_mem_rd_re   : out std_logic; -- Will the data be read from memory (stall)
+
       -- Memory signals
 
       i_load_data  : in std_logic_vector(XLEN-1 downto 0); --Memory data read
@@ -71,8 +77,15 @@ begin
     o_store_data <= i_store_data;    
     o_mem_adress <= i_alu_result;
     o_we <= i_we;        
-    o_re <= i_re;
+    o_re <= i_re or i_we; -- when we write we need both enabled on
     
     o_load_data <= i_load_data;
+
+
+    -- Forwarding 
+    o_mem_rd_addr <= i_rd_addr;
+    o_mem_rd_data <= i_alu_result;
+    o_mem_rd_wb <= i_wb;
+    o_mem_rd_re <= i_re;
 
 end architecture beh;

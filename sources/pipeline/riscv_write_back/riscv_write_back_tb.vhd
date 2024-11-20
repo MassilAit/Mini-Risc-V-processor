@@ -23,6 +23,10 @@ architecture tb of tb_riscv_write_back is
     signal o_rd_addr    : std_logic_vector(REG_WIDTH-1 downto 0);
     signal o_rd_data    : std_logic_vector(XLEN-1 downto 0);
 
+    signal o_wb_rd_addr : std_logic_vector(REG_WIDTH-1 downto 0); 
+    signal o_wb_rd_data : std_logic_vector(XLEN-1 downto 0); 
+    signal o_wb_rd_wb   : std_logic;
+
 begin
     -- Instantiate the DUT
     DUT: entity work.riscv_write_back
@@ -34,7 +38,10 @@ begin
             i_re_wb      => i_re_wb,
             o_wb         => o_wb,
             o_rd_addr    => o_rd_addr,
-            o_rd_data    => o_rd_data
+            o_rd_data    => o_rd_data,
+            o_wb_rd_addr => o_wb_rd_addr,
+            o_wb_rd_data => o_wb_rd_data,
+            o_wb_rd_wb   => o_wb_rd_wb
         );
 
     -- Test Process
