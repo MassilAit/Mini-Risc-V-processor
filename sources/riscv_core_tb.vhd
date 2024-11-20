@@ -40,17 +40,17 @@ signal	clk		: std_logic := '0';
 signal	rstn		: std_logic := '0';
 
 signal imem_en : std_logic;
-signal imem_addr : std_logic_vector(DEPTH-1 downto 0);
+signal imem_addr : std_logic_vector(32-1 downto 0);
 signal imem_read : std_logic_vector(31 downto 0);
 
 signal dmem_en : std_logic;
 signal dmem_we : std_logic;
-signal dmem_addr : std_logic_vector(DEPTH-1 downto 0);
+signal dmem_addr : std_logic_vector(32-1 downto 0);
 signal dmem_read : std_logic_vector(31 downto 0);
 signal dmem_write : std_logic_vector(31 downto 0);
 
-signal imem_addr_div4 : std_logic_vector(DEPTH-1 downto 0);
-signal dmem_addr_div4 : std_logic_vector(DEPTH-1 downto 0);
+signal imem_addr_div4 : std_logic_vector(32-1 downto 0);
+signal dmem_addr_div4 : std_logic_vector(32-1 downto 0);
 
 constant PERIOD   : time := 100 ns;
 
@@ -68,7 +68,7 @@ MEM0 : entity work.dpm
     i_a_rstn  => rstn,         -- Reset Address
     i_a_en    => imem_en,            -- Port enable
     i_a_we    => '0',            -- Write enable
-    i_a_addr  => imem_addr_div4(8 downto 0),     	 -- Address port			
+    i_a_addr  => imem_addr(10 downto 2),     	 -- Address port			
     i_a_write => X"00000000",      	 -- Data write port
     o_a_read  => imem_read,-- Data read port
     -- Port B
@@ -76,14 +76,12 @@ MEM0 : entity work.dpm
     i_b_rstn  => rstn,           -- Reset Address
     i_b_en    => dmem_en,            -- Port enable
     i_b_we    => dmem_we,                -- Write enable
-    i_b_addr  => dmem_addr_div4(8 downto 0),      -- Address port  --Mettre adresse initiale a 1000 kb
+    i_b_addr  => dmem_addr(10 downto 2),      -- Address port  --Mettre adresse initiale a 1000 kb
     i_b_write => dmem_write,     -- Data write port
     o_b_read  => dmem_read    	 -- Data read port
 );
 
-
-imem_addr_div4 <= imem_addr srl 2;     --the memory is only word adressable and not byte so divide the instruction adress by 4
-dmem_addr_div4 <= dmem_addr srl 2;     
+ 
 
 DUT : entity work.riscv_core 
 port map(
