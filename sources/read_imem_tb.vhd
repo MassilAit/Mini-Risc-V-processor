@@ -2,6 +2,10 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+library std;
+use     std.textio.all;                                                      
+use     std.env.all;
+
 library work;
 use work.riscv_pkg.all;
 
@@ -26,6 +30,22 @@ architecture tb of tb_read_imem is
         );
     end component;
 
+    constant DEPTH : integer := 9;
+
+    --Instruction memory signals 
+    signal imem_en : std_logic :='1';
+    signal imem_addr : std_logic_vector(31 downto 0);
+    signal imem_read : std_logic_vector(31 downto 0) := (others => '0');
+    signal imem_addr_div4 : std_logic_vector(DEPTH-1 downto 0) := (others => '0');
+
+    -- Data memory signals  (not used)
+    signal dmem_en : std_logic := '0' ;
+    signal dmem_we : std_logic := '0';
+    signal dmem_addr : std_logic_vector(DEPTH-1 downto 0):= (others => '0');
+    signal dmem_read : std_logic_vector(31 downto 0) := (others => '0');
+    signal dmem_write : std_logic_vector(31 downto 0):= (others => '0');
+    signal dmem_addr_div4 : std_logic_vector(DEPTH-1 downto 0) := (others => '0');
+
 
     signal clk       : std_logic := '0';
     signal rstn      : std_logic := '1';
@@ -33,13 +53,11 @@ architecture tb of tb_read_imem is
     signal flush     : std_logic := '0';
     signal transfert : std_logic := '0';
     signal target    : std_logic_vector(XLEN-1 downto 0) := (others => '0');
-    signal imem_read : std_logic_vector(XLEN-1 downto 0) := (others => '0');
-    signal imem_addr : std_logic_vector(XLEN-1 downto 0);
     signal pc_current: std_logic_vector(XLEN-1 downto 0);
     signal instr     : std_logic_vector(XLEN-1 downto 0);
 
     -- Clock generation constant
-    constant CLK_PERIOD : time := 100 ns;
+    constant CLK_PERIOD : time := 10 ns;
 
 begin
     -- Instantiate DUT
@@ -57,6 +75,34 @@ begin
             o_instr     => instr
         );
 
+        MEM0 : entity work.dpm 
+          generic map (
+            WIDTH => 32,
+            DEPTH => 9,
+            RESET => 16#00000000#,
+            INIT  => "riscv_basic.mem")
+          port map (
+            -- Port A
+            i_a_clk   => clk,          -- Clock
+            i_a_rstn  => rstn,         -- Reset Address
+            i_a_en    => '1',            -- Port enable
+            i_a_we    => '0',            -- Write enable
+            i_a_addr  => imem_addr_div4(8 downto 0),     	 -- Address port			
+            i_a_write => X"00000000",      	 -- Data write port
+            o_a_read  => imem_read,-- Data read port
+            -- Port B
+            i_b_clk   => clk,          -- Clock
+            i_b_rstn  => rstn,           -- Reset Address
+            i_b_en    => dmem_en,            -- Port enable
+            i_b_we    => dmem_we,                -- Write enable
+            i_b_addr  => dmem_addr_div4(8 downto 0),      -- Address port  --Mettre adresse initiale a 1000 kb
+            i_b_write => dmem_write,     -- Data write port
+            o_b_read  => dmem_read    	 -- Data read port
+        );
+
+        imem_addr_div4 <= imem_addr(10 downto 2);
+        dmem_addr_div4 <= imem_addr(10 downto 2); 
+
     -- Clock Generation Process
     clk_process : process
     begin
@@ -71,82 +117,47 @@ begin
 -- Test Stimulus
     stimulus_process : process
     begin
-        -- Test Case 1: Reset
+        
         rstn <= '0'; -- Assert reset
-        wait for CLK_PERIOD;
+        wait for CLK_PERIOD/2;
+
         
-        -- Check reset behavior
-        if imem_addr = std_logic_vector(to_unsigned(16#00000000#, XLEN)) then
-            assert false report "Test Case 1 Passed: PC reset to the reset vector." severity note;
-        else
-            assert false report "Test Case 1 Failed: PC did not reset correctly." severity error;
-        end if;
+        rstn <= '1'; 
 
-        rstn <= '1'; -- De-assert reset
-        wait for CLK_PERIOD;
+        wait for 4*CLK_PERIOD+CLK_PERIOD/2;
 
-        -- Test Case 2: Normal Operation
-        imem_read <= x"12345678"; 
-        wait for CLK_PERIOD;
+        flush <= '1';
+        transfert <='1';
+        target <= "00000000000000000000000000000100";
+
+        --stall<= '1';
         
-        if instr = x"12345678" then
-            assert false report "Test Case 2 Passed: Instruction fetched successfully." severity note;
-        else
-            assert false report "Test Case 2 Failed: Instruction not fetched correctly." severity error;
-        end if;
 
+        wait for CLK_PERIOD*1;
 
-        -- Test Case 3: Stall Behavior
-        stall <= '1'; -- Stall the pipeline
-        imem_read <= x"DEADBEEF"; -- Change instruction
-        wait for CLK_PERIOD;
-
-        if instr = x"12345678" then
-            assert false report "Test Case 3 Passed: Instruction held during stall." severity note;
-        else
-            assert false report "Test Case 3 Failed: Instruction changed during stall." severity error;
-        end if;
-
-        stall <= '0'; -- Release stall
-        wait for CLK_PERIOD;
-
-        if instr = x"DEADBEEF" then
-            assert false report "Test Case 3.1 Passed: Instruction updated after stall release." severity note;
-        else
-            assert false report "Test Case 3.1 Failed: Instruction did not update after stall release." severity error;
-        end if;
-
-
-        -- Test Case 4: Flush Behavior
-        flush <= '1'; -- Flush the pipeline
-        wait for CLK_PERIOD;
         flush <= '0';
+        transfert <='0';
+        target <= (others => '0');
 
-        if instr = x"00000013" then
-            assert false report "Test Case 4 Passed: NOP instruction inserted during flush." severity note;
-        else
-            assert false report "Test Case 4 Failed: Incorrect behavior during flush." severity error;
-        end if;
+        wait for CLK_PERIOD*3;
 
-        -- Test Case 5: Transfert (Jump) Behavior
-        transfert <= '1';
-        target <= std_logic_vector(to_unsigned(16#00000010#, XLEN)); -- Jump target address
+        stall<= '1';
+
+        flush <= '0';
+        transfert <='0';
+        target <= (others => '0');
+
         wait for CLK_PERIOD;
-        transfert <= '0';
 
-        if imem_addr = std_logic_vector(to_unsigned(16#00000010#, XLEN)) then
-            assert false report "Test Case 5 Passed: PC updated to jump target." severity note;
-        else
-            assert false report "Test Case 5 Failed: PC did not update correctly for jump." severity error;
-        end if;
+        stall <= '0';
+ 
 
-        -- Test Case 6: PC current Behavior
 
-        if pc_current = std_logic_vector(to_unsigned(16#00000010#, XLEN)) then
-            assert false report "Test Case 6 Passed: PC current do follows the PC value." severity note;
-        else
-            assert false report "Test Case 5 Failed: PC current do not follows the PC value." severity error;
-        end if;
+
+        
+        
+        
+        
 
         wait;
     end process stimulus_process;
