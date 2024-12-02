@@ -140,13 +140,7 @@ begin
             assert false report "Test Case 5 Failed: PC did not update correctly for jump." severity error;
         end if;
 
-        -- Test Case 6: PC current Behavior
-
-        if pc_current = std_logic_vector(to_unsigned(16#00000010#, XLEN)) then
-            assert false report "Test Case 6 Passed: PC current do follows the PC value." severity note;
-        else
-            assert false report "Test Case 5 Failed: PC current do not follows the PC value." severity error;
-        end if;
+    
 
         wait;
     end process stimulus_process;

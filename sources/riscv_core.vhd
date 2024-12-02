@@ -63,6 +63,9 @@ architecture beh of riscv_core is
     signal id_ex_we         : std_logic;
     signal id_ex_re         : std_logic;
     signal id_ex_pc_current : std_logic_vector(XLEN-1 downto 0);
+    signal id_ex_spc        : std_logic;
+    signal id_ex_odd        : std_logic;
+    signal id_ex_neg        : std_logic;
 
     --MEM to EX
     signal mem_ex_rd_addr : std_logic_vector(REG_WIDTH-1 downto 0); 
@@ -140,6 +143,9 @@ begin
             o_wb          => id_ex_wb,
             o_we          => id_ex_we,
             o_re          => id_ex_re,
+            o_spc         => id_ex_spc,
+            o_odd         => id_ex_odd,
+            o_neg         => id_ex_neg,
             o_pc_current  => id_ex_pc_current
         );
 
@@ -174,6 +180,9 @@ begin
             i_wb          => id_ex_wb,
             i_we          => id_ex_we,
             i_re          => id_ex_re,
+            i_spc         => id_ex_spc,
+            i_odd         => id_ex_odd,
+            i_neg         => id_ex_neg,
             i_pc_current  => id_ex_pc_current,
             o_stall       => ex_stall,     
             o_flush       => ex_flush,     

@@ -50,6 +50,12 @@ entity riscv_execute is
       i_we        : in std_logic;   --write memory
       i_re        : in std_logic;  --read memory
 
+      --Special Instruction
+      i_spc      : in std_logic;  --Is special instr
+      i_odd      : in std_logic;  --Is func3 odd
+      i_neg      : in std_logic; --Is func3 negative
+
+
       i_pc_current  : in std_logic_vector(XLEN-1 downto 0); --pc_current value
 
       -- Control 
@@ -88,8 +94,12 @@ architecture beh of riscv_execute is
     signal stall_rs2 : std_logic;
     signal stall     : std_logic;
 
+    signal spc_op     : std_logic_vector(XLEN-1 downto 0);
+    signal spc_result : std_logic_vector(XLEN-1 downto 0);
+
     -- Intermediate signals   
-    signal alu_result : std_logic_vector(XLEN-1 downto 0); 
+    signal alu_dr_result : std_logic_vector(XLEN-1 downto 0);
+    signal alu_result : std_logic_vector(XLEN-1 downto 0);  
 
     
 begin
@@ -101,7 +111,7 @@ begin
       i_shamt  => shamt,
       i_src1   => op1_alu,
       i_src2   => op2_alu,
-      o_res    => alu_result
+      o_res    => alu_dr_result
     );
 
     adder: entity work.riscv_adder
@@ -118,6 +128,59 @@ begin
     
     o_target <= target(XLEN-1 downto 0);
 
+
+    --------------------------------------------------------------------------------------------------
+    --                                  SPECIAL INSTRUCTION                                         --
+    --------------------------------------------------------------------------------------------------
+    OP_SPC: process(i_imm, rs1_data,i_neg)
+    begin
+      case( i_neg ) is
+      
+        when '0' => -- Positive
+          spc_op <= rs1_data;
+        
+        when others => --Negative
+          spc_op <=i_imm;
+      
+      end case ;
+      
+    end process OP_SPC;
+
+    RES_SPC: process(spc_op, i_odd)
+    begin
+      case( i_odd ) is
+      
+        when '0' => -- EVEN (LE -> BE)
+          spc_result(31 downto 24) <= spc_op(7 downto 0);
+          spc_result(23 downto 16) <= spc_op(15 downto 8);
+          spc_result(15 downto 8)  <= spc_op(23 downto 16);
+          spc_result(7 downto 0)   <= spc_op(31 downto 24);
+      
+        when others => -- ODD (BE -> LE)
+          spc_result(31 downto 24) <= spc_op(7 downto 0);   -- Byte 0 -> Byte 3
+          spc_result(23 downto 16) <= spc_op(15 downto 8);  -- Byte 1 -> Byte 2
+          spc_result(15 downto 8)  <= spc_op(23 downto 16); -- Byte 2 -> Byte 1
+          spc_result(7 downto 0)   <= spc_op(31 downto 24); -- Byte 3 -> Byte 0
+      
+      end case ;
+      
+    end process RES_SPC;
+
+    SPC_C: process(alu_dr_result, spc_result, i_spc)
+    begin
+      case( i_spc ) is
+      
+        when '0' =>
+          alu_result <= alu_dr_result;
+
+        when others =>
+          alu_result <= spc_result;
+      
+      end case ;
+      
+    end process SPC_C;
+
+    ---------------------------------------------------------------------------------------------------
 
     -- Forwarding for rs1
     process(i_rs1_data, i_rs1_addr, i_mem_rd_addr, i_mem_rd_data, i_mem_rd_wb, i_mem_rd_re, i_wb_rd_addr, i_wb_rd_data, i_wb_rd_wb)
@@ -277,10 +340,10 @@ begin
     end process OP1ADDER;
 
     -- Computes the pc_transfert
-    pc_transfer: process(i_jmp, i_brnch, alu_result)
+    pc_transfer: process(i_jmp, i_brnch, alu_dr_result)
     begin
       -- BEQ
-      if i_brnch = '1' and alu_result = std_logic_vector (to_signed(0, XLEN)) then
+      if i_brnch = '1' and alu_dr_result = std_logic_vector (to_signed(0, XLEN)) then
         o_transfert <= '1' ;
         o_flush <= '1' ;
 

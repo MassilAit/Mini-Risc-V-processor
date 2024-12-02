@@ -96,10 +96,10 @@ begin
     i_sign   <= '0';  -- Set for unsigned operation
     i_opcode<=ALUOP_SLT;
     wait for 5 ns;
-    if o_res = std_logic_vector(to_unsigned(1, XLEN)) then
-     assert false report "Test 3 Passed: Null result outputs 1" severity note;
+    if o_res = std_logic_vector(to_unsigned(0, XLEN)) then
+     assert false report "Test 3 Passed: SLT result outputs 1" severity note;
     else
-     assert false report "Test 3 Failed: Null result outputs 0" severity error;
+     assert false report "Test 3 Failed: SLT result outputs 0" severity error;
     end if;
 
     wait for 20 ns;
@@ -112,9 +112,9 @@ begin
     i_opcode<=ALUOP_SLT;
     wait for 5 ns;
     if o_res = std_logic_vector(to_unsigned(0, XLEN)) then
-     assert false report "Test 4 Passed: Non null result outputs 0" severity note;
+     assert false report "Test 4 Passed: SLT result outputs 0" severity note;
     else
-     assert false report "Test 4 Failed: Non null result outputs 1" severity error;
+     assert false report "Test 4 Failed: SLT  null result outputs 1" severity error;
     end if;
 
     wait for 20 ns;

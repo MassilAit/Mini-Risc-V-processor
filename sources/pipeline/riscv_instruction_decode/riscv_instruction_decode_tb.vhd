@@ -47,6 +47,9 @@ architecture tb of tb_riscv_instruction_decode is
     signal o_wb         : std_logic;
     signal o_we         : std_logic;
     signal o_re         : std_logic;
+    signal o_spc        : std_logic;
+    signal o_odd        : std_logic;
+    signal o_neg        : std_logic;
     signal o_pc_current : std_logic_vector(XLEN-1 downto 0);
 
     -- Clock generation constant
@@ -84,6 +87,9 @@ begin
             o_wb          => o_wb,
             o_we          => o_we,
             o_re          => o_re,
+            o_spc         => o_spc,
+            o_odd         => o_odd,
+            o_neg         => o_neg,
             o_pc_current  => o_pc_current
         );
 
@@ -119,7 +125,38 @@ begin
         i_rd_addr <= std_logic_vector(to_unsigned(2, REG_WIDTH)); -- Write address = 2
         i_rd_data <= std_logic_vector(to_unsigned(4, XLEN)); -- Write data = 4
         wait for CLK_PERIOD;
-    
+
+        i_instr <= "000000000010" & "00001" & "100" & "00011" & "1010101"; -- Instruction ESWP (reading from R1=3)
+        i_pc_current <= "00000000000000000000000000000100"; --PC counter to 4 
+            
+        -- No data to read 
+        i_wb <= '0';
+        i_rd_addr <= (others => '0');
+        i_rd_data <= (others => '0');
+        
+        wait for CLK_PERIOD;
+
+        report "Result for instruction ESWP : " severity note;
+
+        assert o_rs1_data = std_logic_vector(to_unsigned(3, XLEN))
+            report "rs1 data incorrect" severity error;
+
+        assert o_rs1_addr = "00001" 
+            report "rs1 address incorrect" severity error;
+
+        assert o_spc = '1'
+            report "Special instruction flag incorrect" severity error;
+
+        assert o_odd = '0'
+            report "Odd flag incorrect" severity error;
+
+        assert o_neg = '1'
+            report "Negative flag incorrect" severity error;
+
+        assert o_wb = '1'
+            report "write-back flag incorrect" severity error;
+
+
         i_instr <= "0000000" & "00010" & "00001" & "000" & "00011" & "0110011"; -- Instruction ADD (reading from R1=1 and R2=2)
         i_pc_current <= "00000000000000000000000000000100"; --PC counter to 4 
         
@@ -183,8 +220,17 @@ begin
         assert o_re = '0'
             report "read-enable flag incorrect" severity error;
 
+        assert o_spc = '0'
+            report "Special instruction flag incorrect" severity error;
+
+        assert o_odd = '0'
+            report "Odd flag incorrect" severity error;
+
+        assert o_neg = '0'
+            report "Negative flag incorrect" severity error;
 
 
+        
         --Stalling
 
         i_stall <= '1';

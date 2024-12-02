@@ -65,6 +65,8 @@ begin
       o_pc        => pc_out
     );
 
+
+    -- Latching the flush signal for 1 cycle
     process(i_clk, i_rstn)
     begin
         if i_rstn = '0' then
@@ -78,7 +80,7 @@ begin
         end if;
     end process;
 
-
+    -- Register for the pc_counter
     delayed_pc: process(i_clk, i_rstn)
     begin
       if i_rstn = '0' then
@@ -97,6 +99,21 @@ begin
     end process delayed_pc;
 
 
+    -- Mux for the o_imen_addr in stall mode
+    process(pc_out, pc_delay, i_stall)
+    begin
+      if i_stall = '1' then
+        o_imem_addr <=pc_delay;
+
+      else 
+        o_imem_addr <= pc_out;
+
+      end if;
+      
+    end process ;
+
+
+    --IF/ID register
     process(i_clk, i_rstn)
         begin
           if i_rstn = '0' then
@@ -126,18 +143,8 @@ begin
     end process;
 
 
-    process(pc_out, pc_delay, i_stall)
-    begin
-      if i_stall = '1' then
-        o_imem_addr <=pc_delay;
 
-      else 
-        o_imem_addr <= pc_out;
-
-      end if;
-      
-    end process ;
-
+                
     o_pc_current <= pc_current;
     o_instr <= next_instruction;
 

@@ -52,6 +52,10 @@ entity riscv_instruction_decode is
       o_we        : out std_logic;   --write memory
       o_re        : out std_logic;  --read memory
 
+      --Special Instruction
+      o_spc      : out std_logic;  --Is special instr
+      o_odd      : out std_logic;  --Is func3 odd
+      o_neg      : out std_logic; --Is func3 negative
 
       o_pc_current   : out std_logic_vector(XLEN-1 downto 0)); --pc_current value
       
@@ -80,6 +84,9 @@ architecture beh of riscv_instruction_decode is
     signal wb        : std_logic;
     signal we        : std_logic;
     signal re        : std_logic;
+    signal spc       : std_logic;
+    signal odd       : std_logic;
+    signal neg       : std_logic;
 
     -- Register output signals :
     signal r_rs1_addr  : std_logic_vector(REG_WIDTH-1 downto 0);
@@ -98,6 +105,9 @@ architecture beh of riscv_instruction_decode is
     signal r_wb        : std_logic;
     signal r_we        : std_logic;
     signal r_re        : std_logic;
+    signal r_spc       : std_logic;
+    signal r_odd       : std_logic;
+    signal r_neg       : std_logic;
     signal r_pc_current: std_logic_vector(XLEN-1 downto 0);
     
 begin
@@ -120,7 +130,10 @@ begin
             o_rshmt => rshmt,
             o_wb => wb,
             o_we => we,
-            o_re => re
+            o_re => re,
+            o_spc => spc,
+            o_odd => odd,
+            o_neg => neg
         );
 
     -- Register file module
@@ -174,6 +187,9 @@ begin
             r_wb         <= '0';      
             r_we         <= '0';
             r_re         <= '0';
+            r_spc        <= '0';
+            r_odd        <= '0';
+            r_neg        <= '0';
             r_pc_current <= (others => '0');
             r_rs1_addr   <= (others => '0');
             r_rs2_addr   <= (others => '0');
@@ -195,6 +211,9 @@ begin
                 r_wb <= '0';      
                 r_we <= '0';
                 r_re <= '0';
+                r_spc <= '0';
+                r_odd <= '0';
+                r_neg <= '0';
                 r_pc_current <= (others => '0');
                 r_rs1_addr   <= (others => '0');
                 r_rs2_addr   <= (others => '0');
@@ -214,6 +233,9 @@ begin
                 r_wb         <= r_wb;
                 r_we         <= r_we;
                 r_re         <= r_re;
+                r_spc        <= r_spc;
+                r_odd        <= r_odd;
+                r_neg        <= r_neg;
                 r_pc_current <= r_pc_current;
                 r_rs1_addr   <= r_rs1_addr;
                 r_rs2_addr   <= r_rs2_addr; 
@@ -234,6 +256,9 @@ begin
                 r_wb <= wb;      
                 r_we <= we;
                 r_re <= re;
+                r_spc <= spc;
+                r_odd <= odd;
+                r_neg <= neg;
                 r_pc_current <= i_pc_current;
                 r_rs1_addr   <= rs1_addr;
                 r_rs2_addr   <= rs2_addr;
@@ -257,6 +282,9 @@ begin
     o_wb         <= r_wb;
     o_we         <= r_we;
     o_re         <= r_re;
+    o_spc        <= r_spc;
+    o_odd        <= r_odd;
+    o_neg        <= r_neg;
     o_pc_current <= r_pc_current;
     o_rs1_addr   <= r_rs1_addr;
     o_rs2_addr   <= r_rs2_addr; 

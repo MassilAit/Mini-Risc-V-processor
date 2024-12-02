@@ -25,13 +25,18 @@ entity decode is
       
       -- Flags
       o_jmp       : out std_logic;   --jmp instr
-      o_jalr       : out std_logic;   --is jalr instr
+      o_jalr      : out std_logic;   --is jalr instr
       o_brnch     : out std_logic;   --branch instr
       o_src_imm   : out std_logic;   --immediate value
       o_rshmt     : out std_logic;   --use rs2 for shamt
       o_wb        : out std_logic;   --write register back
       o_we        : out std_logic;   --write memory
-      o_re        : out std_logic);  --read memory
+      o_re        : out std_logic;   --read memory
+
+      --Special Instruction
+      o_spc      : out std_logic;  --Is special instr
+      o_odd      : out std_logic;  --Is func3 odd
+      o_neg      : out std_logic); --Is func3 negative 
 end entity decode;
 
 
@@ -68,7 +73,10 @@ begin
         o_rshmt <= '0'; 
         o_wb <= '0';      
         o_we <= '0';
-        o_re <= '0'; 
+        o_re <= '0';
+        o_spc <='0';
+        o_odd <='0';
+        o_neg <= '0'; 
 
         case( opcode ) is
         
@@ -236,7 +244,7 @@ begin
                 o_we <= '0';
                 o_re <= '0';   
 
-            when "1100111" | "0000011" | "0010011"=>  -- I-Type
+            when "1100111" | "0000011" | "0010011" | "1010101"=>  -- I-Type
 
                 o_rs1_addr <= i_instr(19 downto 15); -- using rs1
                 o_rs2_addr <= (others => '0'); -- not using rs2
@@ -271,6 +279,15 @@ begin
                     o_src_imm <= '1'; -- Using the immediate value 
                     o_wb <= '1';  -- We write the value back    
                     o_re <= '1';  -- Read from memory
+
+                elsif opcode="1010101" then --eswp
+                    -- Special instruction
+                    o_spc <= '1'; 
+                    o_odd <= funct3(0);
+                    o_neg <= funct3(2);
+
+                    o_wb <= '1';      --We write the result back
+
 
                 elsif opcode="0010011" and funct3="000" then -- ADDI
                     -- ALU  used : rs1 + IMM

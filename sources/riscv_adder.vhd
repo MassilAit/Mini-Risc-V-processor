@@ -50,6 +50,8 @@ begin
   
 end process bit_extension;
 
+
+--Process to do the addition
 adder: process(op1,op2)
   variable carry_1 : std_logic_vector(N downto 0);
   variable carry_2 : std_logic_vector(N downto 0);

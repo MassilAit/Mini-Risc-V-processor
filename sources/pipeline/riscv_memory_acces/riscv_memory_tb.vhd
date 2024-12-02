@@ -108,6 +108,8 @@ begin
 
         -- Test Case 1: Write to memory
 
+        assert false report "Test Case 1 Write to memory." severity note;
+
         i_we <= '1';
         i_alu_result <= x"00000004";
         i_store_data <= x"DEADBEEF";
@@ -119,6 +121,7 @@ begin
 
 
         -- Test Case 2: Read from memory
+        assert false report "Test Case 2 Read from memory." severity note;
         i_we <= '0';
         i_re <= '1';
         i_load_data <= x"CAFEBABE";
@@ -128,6 +131,7 @@ begin
         assert o_load_data = x"CAFEBABE" report "Test Case 2 Failed: Incorrect load data" severity error;
 
          -- Test Case 3: Pass-through ALU result to WB
+         assert false report "Test Case 3 Pass ALU result to WB" severity note;
          i_alu_result <= x"12345678";
          i_wb <= '1';
          i_re <= '0';

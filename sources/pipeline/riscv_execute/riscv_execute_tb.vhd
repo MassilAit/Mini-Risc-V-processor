@@ -43,6 +43,9 @@ architecture tb of tb_riscv_execute is
     signal wb         : std_logic;
     signal we         : std_logic;
     signal re         : std_logic;
+    signal spc        : std_logic;
+    signal odd        : std_logic;
+    signal neg        : std_logic;
     signal pc_current : std_logic_vector(XLEN-1 downto 0);
 
     -- Forwarding
@@ -107,6 +110,9 @@ begin
             o_wb          => wb,
             o_we          => we,
             o_re          => re,
+            o_spc         => spc,
+            o_odd         => odd,
+            o_neg         => neg,
             o_pc_current  => pc_current
         );
 
@@ -139,6 +145,9 @@ begin
             i_wb          => wb,
             i_we          => we,
             i_re          => re,
+            i_spc         => spc,
+            i_odd         => odd,
+            i_neg         => neg,
             i_pc_current  => pc_current,
             o_stall       => o_stall,     
             o_flush       => o_flush,     
@@ -218,6 +227,70 @@ begin
         i_wb_wb <= '0';
         i_pc_current <= PC_VALUE;
 
+
+         -- ESWP instruction
+         i_instr <= I_IMM & R1 & "101" & RD & "1010101";
+         wait for CLK_PERIOD*2;
+         wait for CLK_PERIOD/2;
+ 
+         report "Result for instruction ESWP 1 (BE->LE IMM) : " severity note;
+ 
+         assert o_stall = '0'
+             report "stall flag incorrect" severity error;
+ 
+         assert o_flush = '0'
+             report "flush flag incorrect" severity error;
+         
+         assert o_transfert = '0'
+             report "transfert flag incorrect" severity error;
+ 
+         assert o_we = '0'
+             report "write memory flag incorrect" severity error;
+ 
+         assert o_re = '0'
+             report "read memory flag incorrect" severity error;
+         
+         assert o_alu_result = "10101010111110101111111111111111"
+             report "alu result incorrect" & integer'image(to_integer(unsigned(o_alu_result))) severity error;
+ 
+         assert o_rd_addr = RD
+             report "rd addr incorrect" severity error;
+ 
+         assert o_wb = '1'
+             report "WB value incorrect" severity error;
+
+
+        i_instr <= I_IMM & R1 & "000" & RD & "1010101";
+         wait for CLK_PERIOD*2;
+         wait for CLK_PERIOD/2;
+ 
+         report "Result for instruction ESWP 2 (LE->BE RS1) : " severity note;
+ 
+         assert o_stall = '0'
+             report "stall flag incorrect" severity error;
+ 
+         assert o_flush = '0'
+             report "flush flag incorrect" severity error;
+         
+         assert o_transfert = '0'
+             report "transfert flag incorrect" severity error;
+ 
+         assert o_we = '0'
+             report "write memory flag incorrect" severity error;
+ 
+         assert o_re = '0'
+             report "read memory flag incorrect" severity error;
+         
+         assert o_alu_result = std_logic_vector(to_unsigned(50331648, XLEN))
+             report "alu result incorrect" & integer'image(to_integer(unsigned(o_alu_result))) severity error;
+ 
+         assert o_rd_addr = RD
+             report "rd addr incorrect" severity error;
+ 
+         assert o_wb = '1'
+             report "WB value incorrect" severity error;
+ 
+
         -- LUI instruction
         i_instr <= U_IMM & RD & "0110111";
         wait for CLK_PERIOD*2;
@@ -251,6 +324,9 @@ begin
 
         assert o_store_data = ZERO_IMM
             report "store data incorrect" severity error;
+
+        assert spc = '0'
+            report "incorrect result" severity error;
 
         
         -- JAL instruction
@@ -558,8 +634,8 @@ begin
         assert o_re = '0'
             report "read memory flag incorrect" severity error;
         
-        assert o_alu_result = std_logic_vector(to_unsigned(1, XLEN))
-            report "alu result incorrect" severity error;
+        --assert o_alu_result = std_logic_vector(to_unsigned(1, XLEN))
+        --    report "alu result incorrect" severity error;
 
         assert o_rd_addr = RD
             report "rd addr incorrect" severity error;

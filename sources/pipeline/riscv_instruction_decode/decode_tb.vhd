@@ -28,6 +28,9 @@ architecture tb of decode_tb is
     signal o_wb        : std_logic;
     signal o_we        : std_logic;
     signal o_re        : std_logic;
+    signal o_spc       : std_logic;
+    signal o_odd       : std_logic;
+    signal o_neg       : std_logic;
 begin
     -- Instantiate the DUT (Device Under Test)
     uut: entity work.decode
@@ -48,7 +51,10 @@ begin
             o_rshmt => o_rshmt,
             o_wb => o_wb,
             o_we => o_we,
-            o_re => o_re
+            o_re => o_re,
+            o_spc => o_spc,
+            o_odd => o_odd,
+            o_neg => o_neg
         );
 
     -- LUI instruction LUT
@@ -1508,6 +1514,36 @@ begin
         assert o_re = '0'
             report "read-enable flag incorrect" severity error;
 
+        assert o_spc = '0'
+            report "Special instruction flag incorrect" severity error;
+
+        assert o_odd = '0'
+            report "Odd flag incorrect" severity error;
+
+        assert o_neg = '0'
+            report "Negative flag incorrect" severity error;
+
+
+        -- ESWP
+
+        i_instr <= I_IMM & R1 & "101" & RD & "1010101";
+        wait for 10 ns;
+
+        -- Assertions for ESWP instruction
+
+        report "Result for instruction ESWP : " severity note;
+        
+        assert o_spc = '1'
+            report "Special instruction flag incorrect" severity error;
+
+        assert o_odd = '1'
+            report "Odd flag incorrect" severity error;
+
+        assert o_neg = '1'
+            report "Negative flag incorrect" severity error;
+
+        assert o_wb = '1'
+            report "write-back flag incorrect" severity error;
 
         wait; -- Stop simulation
     end process;

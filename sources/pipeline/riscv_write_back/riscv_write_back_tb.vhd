@@ -57,6 +57,8 @@ begin
         wait for CLK_PERIOD;
 
         -- Test 1: Select ALU result (i_re_wb = '0')
+
+        assert false report "Test 1: Select ALU result (i_re_wb = '0')" severity note;
         i_alu_result <= x"12345678";
         i_load_data  <= x"DEADBEEF";
         i_re_wb      <= '0';
@@ -68,6 +70,7 @@ begin
         assert o_rd_addr = "01010" report "Test 1 Failed: RD address incorrect" severity error;
 
         -- Test 2: Select load data (i_re_wb = '1')
+        assert false report "Test 2: Select load data (i_re_wb = '1')" severity note;
         i_re_wb <= '1';
         wait for CLK_PERIOD;
 
@@ -75,6 +78,7 @@ begin
         assert o_rd_addr = "01010" report "Test 2 Failed: RD address incorrect" severity error;
 
         -- Test 3: Write-back enable (i_wb)
+        assert false report "Test 3: Write-back enable (i_wb)" severity note;
         i_wb <= '0';
         wait for CLK_PERIOD;
 
