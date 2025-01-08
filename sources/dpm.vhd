@@ -69,7 +69,7 @@ architecture beh of dpm is
                 open_kind => read_mode, status => file_status);
       -- Check opening status
       assert file_status = open_ok
-        report "load_mem: " & to_string(file_status) & " opening file " & file_name
+        report "load_mem: "  & " opening file "
         severity error;
       -- Read and parse memory file and fill ram with its content
       loop
@@ -84,7 +84,7 @@ architecture beh of dpm is
           -- Check that read was ok
           assert read_ok = true
             report "load_mem: Error reading address at line: "
-            & to_string(Lnum) & " in file " & file_name
+            & " in file " & file_name
             severity error;
           -- Update next_address
           next_address := to_integer(next_address_u);
@@ -94,7 +94,7 @@ architecture beh of dpm is
           -- Check that read was ok
           assert read_ok = true
             report "load_mem: Error reading data at address: "
-            & to_string(next_address) & " in file " & file_name
+            & " in file " & file_name
             severity error;
           -- Update next address
           next_address := next_address + 1;

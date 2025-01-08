@@ -86,7 +86,7 @@ begin
      -- Read from register 1 to confirm the write
      i_we <= '0';
      i_addr_ra <= std_logic_vector(to_unsigned(1, REG_WIDTH));
-     wait for CLK_PERIOD*2;
+     wait for CLK_PERIOD;
  
      if o_data_ra = std_logic_vector(to_unsigned(1, XLEN)) then
        assert false report "Test 1 Passed: Register 1 correctly written with value 1." severity note;
@@ -160,6 +160,34 @@ begin
     
     else
         assert false report "Test 5 Failed: Not all registers reset to 0." severity error;
+    end if;
+
+    -- Test 6: Read both the same register 
+
+    i_addr_ra <= std_logic_vector(to_unsigned(1, REG_WIDTH));
+    i_addr_rb <= std_logic_vector(to_unsigned(1, REG_WIDTH));
+    wait for CLK_PERIOD*2;
+    
+    if o_data_ra = std_logic_vector(to_unsigned(0, XLEN)) and  o_data_rb = std_logic_vector(to_unsigned(0, XLEN)) then
+        assert false report "Test 6 Passed: both values are at the correct value." severity note;
+    
+    else
+        assert false report "Test 6 Failed: Not all values are at correct value." severity error;
+    end if;
+
+    -- Test 7: Read and right the same same register 
+
+    i_addr_ra <= std_logic_vector(to_unsigned(1, REG_WIDTH));
+    i_we <= '1';
+    i_addr_w <= std_logic_vector(to_unsigned(1, REG_WIDTH)); -- Write address = 1
+    i_data_w <= std_logic_vector(to_unsigned(2, XLEN)); -- Write data = 2
+    wait for CLK_PERIOD*2;
+    
+    if o_data_ra = std_logic_vector(to_unsigned(2, XLEN))  then
+        assert false report "Test 7 Passed: read and right the same registry takes data_w value." severity note;
+    
+    else
+        assert false report "Test 7 Failed: read and right the same registry doesn't take data_w value." severity error;
     end if;
 
     wait;

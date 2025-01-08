@@ -17,45 +17,65 @@ end entity riscv_adder;
 
 architecture beh of riscv_adder is
 
-  -- Signals for unsigned versions of the inputs
-  signal op1_u  : unsigned(N downto 0);
-  signal op2_u  : unsigned(N downto 0);
-
-  -- Signals for signed versions of the inputs
-  signal op1_s  : signed(N downto 0);
-  signal op2_s  : signed(N downto 0);
+  -- Signals with bit extended
+  signal op1  : std_logic_vector(N downto 0);
+  signal op2  : std_logic_vector(N downto 0);
 
 begin
 
-  -- Extend the inputs to N+1 bits for both signed and unsigned operations
-  op1_u <= resize(unsigned(i_a), N+1);
-  op2_u <= resize(unsigned(i_b), N+1);
 
-  op1_s <= resize(signed(i_a), N+1);
-  op2_s <= resize(signed(i_b), N+1);
+-- Process to extend the bit and do the second complement
+bit_extension: process(i_a, i_b, i_sign,i_sub)
 
-  -- Combinational process for performing the addition/subtraction
-  process(i_sign, i_sub, op1_u, op2_u, op1_s, op2_s)
-  begin
-    if i_sign = '0' then
-      -- Unsigned operation
-      if i_sub = '0' then
-        -- Unsigned addition
-        o_sum <= std_logic_vector(op1_u + op2_u);
-      else
-        -- Unsigned subtraction
-        o_sum <= std_logic_vector(op1_u - op2_u);
-      end if;
-    else
-      -- Signed operation
-      if i_sub = '0' then
-        -- Signed addition
-        o_sum <= std_logic_vector(op1_s + op2_s);
-      else
-        -- Signed subtraction
-        o_sum <= std_logic_vector(op1_s - op2_s);
-      end if;
-    end if;
-  end process;
+  variable b_temp : std_logic_vector(N downto 0); 
+
+begin
+  if i_sign='1' then
+    op1 <= (i_a(N-1) & i_a);
+    b_temp := (i_b(N-1) & i_b);
+  
+  else
+    op1 <= ('0' & i_a);
+    b_temp := ('0' & i_b);
+    
+  end if;
+
+  if i_sub='1' then
+    op2 <= std_logic_vector(-signed(b_temp));
+  
+  else
+    op2 <= b_temp;
+    
+  end if;
+  
+end process bit_extension;
+
+
+--Process to do the addition
+adder: process(op1,op2)
+  variable carry_1 : std_logic_vector(N downto 0);
+  variable carry_2 : std_logic_vector(N downto 0);
+  variable s       : std_logic_vector(N downto 0);
+
+begin
+  s(0) := op1(0) xor op2(0);
+  carry_1(0) := op1(0) and op2(0);
+  carry_2(0) := '0';
+  o_sum(0) <= s(0);
+
+  for i in 1 to N loop
+
+    s(i) := op1(i) xor op2(i);
+    carry_1(i) := op1(i) and op2(i);
+
+    o_sum(i) <= s(i) xor (carry_1(i-1) or carry_2(i-1));
+    carry_2(i) := s(i) and (carry_1(i-1) or carry_2(i-1));
+
+  end loop;
+
+
+  
+end process adder;
+
 
 end architecture beh;

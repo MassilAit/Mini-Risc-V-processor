@@ -33,6 +33,8 @@ entity riscv_core_tb is
 end riscv_core_tb;
 
 architecture tb of riscv_core_tb is
+
+constant DEPTH : integer := 9;
   
 signal	clk		: std_logic := '0';
 signal	rstn		: std_logic := '0';
@@ -50,7 +52,7 @@ signal dmem_write : std_logic_vector(31 downto 0);
 signal imem_addr_div4 : std_logic_vector(DEPTH-1 downto 0);
 signal dmem_addr_div4 : std_logic_vector(DEPTH-1 downto 0);
 
-constant PERIOD   : time := 100 ns;
+constant PERIOD   : time := 20 ns;
 
 begin
 
@@ -59,7 +61,7 @@ MEM0 : entity work.dpm
     WIDTH => 32,
     DEPTH => 9,
     RESET => 16#00000000#,
-    INIT  => "riscv_basic.mem")
+    INIT  => "/users/Cours/ele8304/20/Labs/VLSI_lab2-vf/sources/riscv_basic.mem")
   port map (
     -- Port A
     i_a_clk   => clk,          -- Clock
@@ -81,7 +83,8 @@ MEM0 : entity work.dpm
 
 
 imem_addr_div4 <= imem_addr srl 2;     --the memory is only word adressable and not byte so divide the instruction adress by 4
-dmem_addr_div4 <= dmem_addr srl 2;     
+dmem_addr_div4 <= dmem_addr srl 2;   
+ 
 
 DUT : entity work.riscv_core 
 port map(
@@ -106,3 +109,4 @@ clk <= not clk after PERIOD/2 ;
 rstn <= '1' after 2*PERIOD;
   
 end architecture tb;
+
