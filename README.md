@@ -1,14 +1,16 @@
-# Laboratoire 2 - Conception d'un microprocesseur
+# Microprocessor Design
 
-Ce répertoire contient les fichiers associés au laboratoire 2 du cours
-[ELE8304](https://www.polymtl.ca/etudes/cours/circuits-integres-tres-grande-echelle). Le but de ce
-laboratoire est de concevoir un microprocesseur simple. Ses objectifs sont les suivants:
-  - Maitriser la conception de systèmes numériques séquentiels
-  - Introduire le flot de conception ASIC: simulation, synthèse, placement et routage
-  - Se familiariser avec les concepts d'analyse temporelle et de contraintes temporelles
-  - Introduire les notions de base d'architecture d'ordinateur
+This project involves designing a microprocessor. It provides an opportunity to become familiar with the design, simulation, synthesis, and physical implementation of complex digital systems using automated design tools. This project follows the standard design flow. Specifically, it involved:
 
-La poursuite de ce laboratoire suppose au préalable de suivre le [tutoriel de conception de circuits
-numériques intégrés](https://intranet.grm.polymtl.ca/wiki/doku.php?id=tutoriels:numerique).
+- Designing a processor model using the **VHDL** language.
+- Performing simulations:
+  - **Behavioral** (VHDL model).
+  - **Timing** (post-synthesis and post-implementation netlist) of the processor.
+- Performing the **logical synthesis** of the processor using the **45 nm** technology from the **GPDK045** kit.
+- Performing **automatic placement and routing** from the post-synthesis netlist of the processor.
 
-Les logiciels et les technologies utilisées sont fournis par [CMC](https://www.cmc.ca/WhatWeOffer/Products/CMC-00200-04870.aspx). Le kit de référence est basé sur la technologie 45nm éducative de *Cadence*: *Generic Process Design Kit* [GPDK045](https://www.cmc.ca/WhatWeOffer/Products/CMC-00200-04870.aspx).
+The software and technologies used are provided by [CMC](https://www.cmc.ca/WhatWeOffer/Products/CMC-00200-04870.aspx). The reference kit is based on the **Cadence** educational 45 nm technology: *Generic Process Design Kit* [GPDK045](https://www.cmc.ca/WhatWeOffer/Products/CMC-00200-04870.aspx).
+
+The following figure presents the processor pipeline:
+
+![Pipeline](doc/pipeline.png "Pipeline")

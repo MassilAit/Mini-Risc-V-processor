@@ -22,6 +22,7 @@ entity riscv_instruction_fetch is
       o_imem_addr : out std_logic_vector(XLEN-1 downto 0);
 
       --To decode
+      o_pc_current   : out std_logic_vector(XLEN-1 downto 0);
       o_instr        : out std_logic_vector(XLEN-1 downto 0));
 end entity riscv_instruction_fetch;
 
@@ -43,7 +44,10 @@ architecture beh of riscv_instruction_fetch is
 
   -- Internal Signals
   signal pc_out : std_logic_vector(XLEN-1 downto 0); -- Output from PC
+  signal pc_delay: std_logic_vector(XLEN-1 downto 0); -- delayed PC to match instruction
   signal next_instruction : std_logic_vector(XLEN-1 downto 0);
+  signal pc_current : std_logic_vector(XLEN-1 downto 0);
+  signal flush_latched : std_logic := '0'; -- Latched flush signal
 
 
 begin
@@ -61,30 +65,90 @@ begin
       o_pc        => pc_out
     );
 
+
+    -- Latching the flush signal for 1 cycle
+    process(i_clk, i_rstn)
+    begin
+        if i_rstn = '0' then
+            flush_latched <= '0';
+        elsif rising_edge(i_clk) then
+            if i_flush = '1' then
+                flush_latched <= '1'; -- Latch the flush signal
+            elsif flush_latched = '1' then
+                flush_latched <= '0'; -- Release the latch after 1 cycle
+            end if;
+        end if;
+    end process;
+
+    -- Register for the pc_counter
+    delayed_pc: process(i_clk, i_rstn)
+    begin
+      if i_rstn = '0' then
+        pc_delay<=pc_out;
+        
+      elsif rising_edge(i_clk) then
+        if i_stall = '1' then
+          pc_delay <=pc_delay;
+
+        else 
+          pc_delay <= pc_out;
+
+        end if;
+        
+      end if;
+    end process delayed_pc;
+
+
+    -- Mux for the o_imen_addr in stall mode
+    process(pc_out, pc_delay, i_stall)
+    begin
+      if i_stall = '1' then
+        o_imem_addr <=pc_delay;
+
+      else 
+        o_imem_addr <= pc_out;
+
+      end if;
+      
+    end process ;
+
+
+    --IF/ID register
     process(i_clk, i_rstn)
         begin
           if i_rstn = '0' then
             next_instruction <= x"00000013";
+            pc_current <= pc_delay;
 
           elsif rising_edge(i_clk) then
-            if i_flush = '1' then
+            if (flush_latched or i_flush) = '1' then
               
                 next_instruction <= x"00000013"; -- RISC-V NOP instruction
+                pc_current <= pc_current;
             
               elsif i_stall = '1' then
               -- Stall: Hold the current state
               next_instruction <= next_instruction;
+              pc_current <= pc_current;
             
               else
               -- Normal operation: Update IF/ID register with fetched instruction
               next_instruction <= i_imem_read;
+              pc_current <= pc_delay;
             end if;
+
+    
+
           end if;
     end process;
 
 
-    o_imem_addr <= pc_out;
+
+                
+    o_pc_current <= pc_current;
     o_instr <= next_instruction;
+
+
 
 
 

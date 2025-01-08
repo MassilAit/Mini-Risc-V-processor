@@ -10,11 +10,11 @@ entity riscv_core is
     i_rstn : in std_logic;
     i_clk : in std_logic;
     o_imem_en : out std_logic;
-    o_imem_addr : out std_logic_vector(31 downto 0);
+    o_imem_addr : out std_logic_vector(8 downto 0);
     i_imem_read : in std_logic_vector(31 downto 0);
     o_dmem_en : out std_logic;
     o_dmem_we : out std_logic;
-    o_dmem_addr : out std_logic_vector(31 downto 0);
+    o_dmem_addr : out std_logic_vector(8 downto 0);
     i_dmem_read : in std_logic_vector(31 downto 0);
     o_dmem_write : out std_logic_vector(31 downto 0);
     -- DFT
@@ -95,6 +95,14 @@ architecture beh of riscv_core is
     signal mem_wb_re_wb     : std_logic;
 
 
+   -- Memory intermediate
+   signal imem_addr_32      :std_logic_vector(XLEN-1 downto 0);
+
+   signal dmem_addr_32      :std_logic_vector(XLEN-1 downto 0);
+
+
+
+
 begin
 
     -- Fetch stage
@@ -107,10 +115,13 @@ begin
             i_transfert => ex_if_transfert,
             i_target    => ex_if_target,
             i_imem_read => i_imem_read,
-            o_imem_addr => o_imem_addr,
+            o_imem_addr => imem_addr_32,
             o_pc_current=> if_id_pc_current,
             o_instr     => if_id_instr
         );
+	
+	o_imem_addr <= imem_addr_32(8 downto 0);
+	
 
 
     --Decode stage
@@ -206,7 +217,7 @@ begin
 
             i_load_data  => i_dmem_read,
             o_store_data => o_dmem_write,
-            o_mem_adress => o_dmem_addr,
+            o_mem_adress => dmem_addr_32,
             o_we         => o_dmem_we,
             o_re         => o_dmem_en,
 
@@ -228,6 +239,9 @@ begin
             o_mem_rd_wb   => mem_ex_rd_wb,
             o_mem_rd_re   => mem_ex_rd_re
         );
+
+
+     o_dmem_addr <= dmem_addr_32(8 downto 0);
 
 
 
