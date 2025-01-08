@@ -2,9 +2,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+
 library work;
 use work.riscv_pkg.all;
-
 
 entity tb_riscv_memory_acces is
 end entity tb_riscv_memory_acces;
@@ -151,13 +151,10 @@ begin
          assert o_wb = '1' report "Test Case 4 Failed: Incorrect WB signal" severity error;
 
 
- 
-
-
-
         -- Stop simulation
         wait;
     end process stim_proc;
 
 
 end architecture testbench;
+
